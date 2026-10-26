@@ -15,4 +15,16 @@ class Cliente extends Model
         'email',
         'observacoes'
     ];
+
+    /*
+    Então a ideia fica:
+    Cliente -> hasMany -> Agendamentos
+    um cliente tem muitos agendamentos.
+    */
+    public function agendamentos()
+    {
+        return $this->hasMany(Agendamento::class);
+    }
+
+
 }

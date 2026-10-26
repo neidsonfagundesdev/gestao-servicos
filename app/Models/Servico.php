@@ -15,4 +15,15 @@ class Servico extends Model
         'preco',
         'ativo',
     ];
+
+
+    /*
+    Agendamento belongsTo Servico
+    Servico hasMany Agendamentos 
+    Um servico possui varios agendamentos
+    */
+    public function agendamentos()
+    {
+        return $this->hasMany(Agendamento::class);
+    }
 }

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ServicoController;
+use App\Http\Controllers\AgendamentoController;
 
                               /* ROTAS CLIENTE */
 
@@ -38,3 +39,20 @@ Route::patch('/servicos/{id}', [ServicoController::class, 'update']);
 
 //rota para deletar um servico
 Route::delete('/servicos/{id}', [ServicoController::class, 'destroy']);
+
+                               /* ROTAS AGENDAMENTOS */
+
+//rota para buscar cliente, servico e funcionario
+Route::get('/agendamentos', [AgendamentoController::class, 'index']);
+
+//rota para criar o agendamento
+Route::post('/agendamentos', [AgendamentoController::class, 'store']);
+
+//rota para buscar os agendamentos por ID
+Route::get('/agendamentos/{id}', [AgendamentoController::class, 'show']);
+
+//rota para atualizar o agendamento pelo ID
+Route::patch('/agendamentos/{id}', [AgendamentoController::class, 'update']);
+
+//rota para deletar pelo ID
+Route::delete('/agendamentos/{id}', [AgendamentoController::class, 'destroy']);

@@ -29,4 +29,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /*
+    belongsTo = pertence a um
+    hasMany   = possui vários
+    User possui varios agendamentos
+    */
+    public function agendamentos()
+    {
+        return $this->hasMany(Agendamento::class);
+    }
 }
