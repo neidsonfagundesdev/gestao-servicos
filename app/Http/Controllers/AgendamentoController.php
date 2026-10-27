@@ -29,12 +29,14 @@ class AgendamentoController extends Controller
         $dados = $request->validate([
             'cliente_id' => ['required', 'integer', 'exists:clientes,id'],
             'servico_id' => ['required', 'integer', 'exists:servicos,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
             'data' => ['required', 'date'],
             'hora' => ['required', 'date_format:H:i'],
             'status' => ['sometimes', 'in:agendado,confirmado,em_atendimento, concluido, cancealdo'],
             'observacoes' => ['nullable', 'string'],
         ]);
+        
+        //Cria o post já vinculado ao usuário logado (injeta o user_id automaticamente).
+        $dados['user_id'] = $request->user()->id;
 
         /*
         Agendamento::where vai na tabela agendamentos

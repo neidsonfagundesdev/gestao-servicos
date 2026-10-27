@@ -1,58 +1,102 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ServicoController;
 use App\Http\Controllers\AgendamentoController;
+use App\Http\Controllers\AuthController;
 
                               /* ROTAS CLIENTE */
 
-//rota para solicitar a lista de clientes
-Route::get('/clientes', [ClienteController::class, 'index']);
+// admin e funcionario autenticados
+Route::middleware('auth:sanctum')->group(function () {
 
-//rota para criar
-Route::post('/clientes', [ClienteController::class, 'store']);
+    //rota para solicitar a lista de clientes
+    Route::get('/clientes', [ClienteController::class, 'index']);
 
-//rota para buscar um cliente especifico pelo ID
-Route::get('/clientes/{id}', [ClienteController::class, 'show']);
+    //rota para buscar um cliente especifico pelo ID
+    Route::get('/clientes/{id}', [ClienteController::class, 'show']);
 
-//rota para atualizacao dos dados
-Route::patch('/clientes/{id}', [ClienteController::class, 'update']);
+    //rota para criar
+    Route::post('/clientes', [ClienteController::class, 'store']);
 
-//rota para deletar os dados por ID
-Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
+    //rota para atualizacao dos dados
+    Route::patch('/clientes/{id}', [ClienteController::class, 'update']);
 
+});
+
+// somente admin -> rota para deletar os dados por ID
+Route::middleware(['auth:sanctum', 'admin'])->delete(
+    '/clientes/{id}',
+    [ClienteController::class, 'destroy']
+);
 
                               /* ROTAS SERVICOS */
 
-//rota para solicitar  alista de servicos.
-Route::get('/servicos', [ServicoController::class, 'index']);
+//permite qualquer usuario autenticado. Somente leitura.
+Route::middleware('auth:sanctum')->group(function () {
+                              
+    //rota para solicitar  alista de servicos.
+    Route::get('/servicos', [ServicoController::class, 'index']);
 
-//rota para criar os servicos
-Route::post('/servicos', [ServicoController::class, 'store']);
+    //rota que busca servico por ID
+    Route::get('/servicos/{id}', [ServicoController::class, 'show']);
 
-//rota que busca servico por ID
-Route::get('/servicos/{id}', [ServicoController::class, 'show']);
+});
 
-//rota para cria o servico
-Route::patch('/servicos/{id}', [ServicoController::class, 'update']);
+//protege as rotas com autenticacao admin
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
-//rota para deletar um servico
-Route::delete('/servicos/{id}', [ServicoController::class, 'destroy']);
+    //rota para criar os servicos
+    Route::post('/servicos', [ServicoController::class, 'store']);
+
+    //rota para criar o servico
+    Route::patch('/servicos/{id}', [ServicoController::class, 'update']);
+
+    //rota para deletar um servico
+    Route::delete('/servicos/{id}', [ServicoController::class, 'destroy']);
+
+});
 
                                /* ROTAS AGENDAMENTOS */
 
-//rota para buscar cliente, servico e funcionario
-Route::get('/agendamentos', [AgendamentoController::class, 'index']);
+//as rotas dependem do Bearer Token
+Route::middleware('auth:sanctum')->group(function () {
 
-//rota para criar o agendamento
-Route::post('/agendamentos', [AgendamentoController::class, 'store']);
+    //rota protegida para buscar cliente, servico e funcionario
+    Route::get('/agendamentos', [AgendamentoController::class, 'index']);
 
-//rota para buscar os agendamentos por ID
-Route::get('/agendamentos/{id}', [AgendamentoController::class, 'show']);
+    //rota protegida para buscar os agendamentos por ID
+    Route::get('/agendamentos/{id}', [AgendamentoController::class, 'show']);
 
-//rota para atualizar o agendamento pelo ID
-Route::patch('/agendamentos/{id}', [AgendamentoController::class, 'update']);
+    //rota protegida para criar o agendamento
+    Route::post('/agendamentos', [AgendamentoController::class, 'store']);
 
-//rota para deletar pelo ID
-Route::delete('/agendamentos/{id}', [AgendamentoController::class, 'destroy']);
+    //rota protegida para atualizar o agendamento pelo ID
+    Route::patch('/agendamentos/{id}', [AgendamentoController::class, 'update']);
+
+});
+
+//rota para deletar agendamento -> somente admin
+Route::middleware(['auth:sanctum', 'admin'])->delete(
+    '/agendamentos/{id}',
+    [AgendamentoController::class, 'destroy']
+);
+
+                               /* ROTAS LOGIN */
+
+//rota para autenticacao de login e senha
+Route::post('/login', [AuthController::class, 'login']);
+
+// rotas protegidas por autenticação
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/me', function (Request $request) {
+        return response()->json([
+            'usuario' => $request->user()
+        ], 200);
+    });
+
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
