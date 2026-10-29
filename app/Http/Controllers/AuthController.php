@@ -33,7 +33,7 @@ class AuthController extends Controller
         com o hash salvo no banco (bcrypt/argon). 
         */
         if (!$usuario || !Hash::check($dados['password'], $usuario->password)) {
-            return repsonse()->json([
+            return response()->json([
                 'erro' => 'E-mail ou senha inválidos.'
             ], 401);
         }
