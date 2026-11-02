@@ -6,6 +6,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ServicoController;
 use App\Http\Controllers\AgendamentoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 
                               /* ROTAS CLIENTE */
 
@@ -100,3 +101,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+                               /* ROTA DASHBOARD */
+
+Route::middleware('auth:sanctum')->get(
+    '/dashboard',
+    [DashboardController::class, 'index']
+);
