@@ -53,6 +53,7 @@ class DashboardController extends Controller
             'funcionario'
         ])
             ->whereDate('data', '>=', today())
+            ->where('status', '!=', 'cancelado')
             ->orderBy('data')
             ->orderBy('hora')
             ->limit(5)
