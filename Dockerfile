@@ -40,8 +40,13 @@ RUN composer install \
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Permite que o Apache/PHP leia os Secret Files do Render.
-RUN usermod -a -G 1000 www-data
+# Cria um grupo com GID 1000 para acessar
+# os Secret Files disponibilizados pelo Render.
+#
+# Depois adiciona o usuário do Apache/PHP (www-data)
+# a esse grupo.
+RUN groupadd -g 1000 rendersecrets \
+    && usermod -a -G rendersecrets www-data
 
 # Faz o Apache apontar para a pasta public do Laravel.
 RUN sed -ri \
@@ -56,7 +61,9 @@ RUN sed -ri \
 # O Render informa a porta através da variável PORT.
 #
 # Antes de iniciar o Apache:
-# - ajustamos a porta
-# - limpamos/cacheamos configurações
-# - executamos as migrations
+# - ajusta a porta usada pelo Apache
+# - cria o cache das configurações do Laravel
+# - executa as migrations
+# - executa o seeder dos usuários de demonstração
+# - inicia o Apache
 CMD ["sh", "-c", "sed -i \"s/Listen 80/Listen ${PORT:-10000}/\" /etc/apache2/ports.conf && sed -i \"s/<VirtualHost \\*:80>/<VirtualHost *:${PORT:-10000}>/\" /etc/apache2/sites-available/000-default.conf && php artisan config:cache && php artisan migrate --force && php artisan db:seed --force && apache2-foreground"]
