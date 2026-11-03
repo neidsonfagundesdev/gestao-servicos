@@ -40,6 +40,9 @@ RUN composer install \
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Permite que o Apache/PHP leia os Secret Files do Render.
+RUN usermod -a -G 1000 www-data
+
 # Faz o Apache apontar para a pasta public do Laravel.
 RUN sed -ri \
     's!/var/www/html!/var/www/html/public!g' \
