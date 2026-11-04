@@ -133,5 +133,45 @@ class ServicoTest extends TestCase
             'id' => $servico->id,
         ]);
     }
+
+    public function test_nao_pode_excluir_servico_com_agendamento(): void
+    {
+        $usuario = User::factory()->create([
+            'perfil' => 'admin',
+        ]);
+
+        Sanctum::actingAs($usuario);
+
+        $cliente = \App\Models\Cliente::create([
+            'nome' => 'Cliente Teste',
+            'telefone' => '71999999999',
+        ]);
+
+        $servico = \App\Models\Servico::create([
+            'nome' => 'Serviço com agendamento',
+            'duracao_minutos' => 60,
+            'preco' => 100,
+            'ativo' => true,
+        ]);
+
+        \App\Models\Agendamento::create([
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'user_id' => $usuario->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '11:00',
+            'status' => 'agendado',
+        ]);
+
+        $response = $this->deleteJson(
+            "/api/servicos/{$servico->id}"
+        );
+
+        $response->assertStatus(409);
+
+        $this->assertDatabaseHas('servicos', [
+            'id' => $servico->id,
+        ]);
+    }
 }
 
