@@ -105,6 +105,13 @@ class ClienteController extends Controller
             ], 404);
         }
 
+        // Verifica se esse cliente possui algum agendamento.
+        if ($cliente->agendamentos()->exists()) {
+            return response()->json([
+                'erro' => 'Não é possível excluir um cliente que possui agendamentos.'
+            ], 409);
+        }
+
         $cliente->delete();
 
         //não devolve nada, apenas status 204

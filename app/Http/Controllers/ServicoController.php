@@ -89,6 +89,13 @@ class ServicoController extends Controller
             ], 404);
         }
 
+        // Verifica se esse serviço possui algum agendamento.
+        if ($servico->agendamentos()->exists()) {
+            return response()->json([
+                'erro' => 'Não é possível excluir um serviço que possui agendamentos.'
+            ], 409);
+        }
+
         $servico->delete();
 
         return response()->json(null, 204);
