@@ -284,4 +284,87 @@ class AgendamentoTest extends TestCase
         ]);
     }
 
+    public function test_agendamento_cancelado_nao_bloqueia_horario(): void
+    {
+        $usuario = User::factory()->create();
+
+        Sanctum::actingAs($usuario);
+
+        $cliente = Cliente::create([
+            'nome' => 'Cliente Teste',
+            'telefone' => '71999999999',
+        ]);
+
+        $servico = Servico::create([
+            'nome' => 'Serviço Teste',
+            'duracao_minutos' => 60,
+            'preco' => 100,
+            'ativo' => true,
+        ]);
+
+        // Já existia um agendamento nesse horário,
+        // mas ele foi cancelado.
+        Agendamento::create([
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'user_id' => $usuario->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '10:00',
+            'status' => 'cancelado',
+        ]);
+
+        // Tenta reutilizar exatamente o mesmo horário.
+        $response = $this->postJson('/api/agendamentos', [
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '10:00',
+        ]);
+
+        $response->assertStatus(201);
+
+        $this->assertDatabaseCount('agendamentos', 2);
+    }
+
+    public function test_banco_nao_permite_dois_agendamentos_ativos_no_mesmo_horario(): void
+    {
+        $usuario = User::factory()->create();
+
+        $cliente = Cliente::create([
+            'nome' => 'Cliente Teste',
+            'telefone' => '71999999999',
+        ]);
+
+        $servico = Servico::create([
+            'nome' => 'Serviço Teste',
+            'duracao_minutos' => 60,
+            'preco' => 100,
+            'ativo' => true,
+        ]);
+
+        Agendamento::create([
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'user_id' => $usuario->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '10:00',
+            'status' => 'agendado',
+        ]);
+
+        $this->expectException(
+            \Illuminate\Database\UniqueConstraintViolationException::class
+        );
+
+        // Mesmo horário e mesmo funcionário.
+        // O status é diferente, mas ambos ocupam o horário.
+        Agendamento::create([
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'user_id' => $usuario->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '10:00',
+            'status' => 'confirmado',
+        ]);
+    }
+
 }

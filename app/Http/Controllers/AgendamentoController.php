@@ -55,6 +55,7 @@ class AgendamentoController extends Controller
         $agendamentosDoDia = Agendamento::with('servico')
             ->where('user_id', $dados['user_id'])
             ->where('data', $dados['data'])
+            ->where('status', '!=', 'cancelado')
             ->get();
 
         // Dois intervalos se sobrepõem quando:
@@ -178,6 +179,7 @@ class AgendamentoController extends Controller
         $agendamentosDoDia = Agendamento::with('servico')
             ->where('user_id', $userId)
             ->where('data', $data)
+            ->where('status', '!=', 'cancelado')
             ->where('id', '!=', $agendamento->id)//exclui o agendamento que esta sendo editado
             ->get();
 
