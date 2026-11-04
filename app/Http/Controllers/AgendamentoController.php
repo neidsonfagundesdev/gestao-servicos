@@ -36,7 +36,7 @@ class AgendamentoController extends Controller
             //after_or_equal:today -> a data precisa ser hoje ou furtura
             'data' => ['required', 'date', 'after_or_equal:today'],
             'hora' => ['required', 'date_format:H:i'],
-            'status' => ['sometimes','in:agendado,confirmado,em_atendimento, concluido, cancelado'],
+            'status' => ['sometimes','in:agendado,confirmado,em_atendimento,concluido,cancelado'],
             'observacoes' => ['nullable', 'string'],
         ]);
         
