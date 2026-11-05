@@ -367,4 +367,102 @@ class AgendamentoTest extends TestCase
         ]);
     }
 
+    public function test_funcionario_nao_pode_editar_agendamento_de_outro_funcionario(): void
+    {
+        $funcionarioA = User::factory()->create([
+            'perfil' => 'funcionario',
+        ]);
+
+        $funcionarioB = User::factory()->create([
+            'perfil' => 'funcionario',
+        ]);
+
+        Sanctum::actingAs($funcionarioA);
+
+        $cliente = Cliente::create([
+            'nome' => 'Cliente Teste',
+            'telefone' => '71999999999',
+        ]);
+
+        $servico = Servico::create([
+            'nome' => 'Serviço Teste',
+            'duracao_minutos' => 60,
+            'preco' => 100,
+            'ativo' => true,
+        ]);
+
+        $agendamento = Agendamento::create([
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'user_id' => $funcionarioB->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '10:00',
+            'status' => 'agendado',
+        ]);
+
+        $response = $this->patchJson(
+            "/api/agendamentos/{$agendamento->id}",
+            [
+                'status' => 'confirmado',
+            ]
+        );
+
+        $response->assertStatus(403);
+
+        $this->assertDatabaseHas('agendamentos', [
+            'id' => $agendamento->id,
+            'status' => 'agendado',
+        ]);
+    }
+
+    public function test_admin_pode_editar_agendamento_de_outro_funcionario(): void
+    {
+        $admin = User::factory()->create([
+            'perfil' => 'admin',
+        ]);
+
+        $funcionario = User::factory()->create([
+            'perfil' => 'funcionario',
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $cliente = Cliente::create([
+            'nome' => 'Cliente Teste',
+            'telefone' => '71999999999',
+        ]);
+
+        $servico = Servico::create([
+            'nome' => 'Serviço Teste',
+            'duracao_minutos' => 60,
+            'preco' => 100,
+            'ativo' => true,
+        ]);
+
+        $agendamento = Agendamento::create([
+            'cliente_id' => $cliente->id,
+            'servico_id' => $servico->id,
+            'user_id' => $funcionario->id,
+            'data' => now()->addDay()->format('Y-m-d'),
+            'hora' => '11:00',
+            'status' => 'agendado',
+        ]);
+
+        $response = $this->patchJson(
+            "/api/agendamentos/{$agendamento->id}",
+            [
+                'status' => 'confirmado',
+            ]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('agendamentos', [
+            'id' => $agendamento->id,
+            'status' => 'confirmado',
+        ]);
+    }
+
 }
+
+

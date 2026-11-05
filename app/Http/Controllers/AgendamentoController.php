@@ -141,6 +141,17 @@ class AgendamentoController extends Controller
             ], 404);
         }
 
+        // Funcionário só pode alterar os próprios agendamentos.
+        // Administrador pode alterar qualquer agendamento.
+        if (
+            $request->user()->perfil !== 'admin' &&
+            $agendamento->user_id !== $request->user()->id
+        ) {
+            return response()->json([
+                'erro' => 'Você não tem permissão para alterar este agendamento.'
+            ], 403);
+        }
+
         //Valida os dados que chegaram.
         // O 'sometimes' permite atualizar só uma parte (ex: só o status).
         // O 'exists' garante que os IDs de cliente, serviço e user realmente existem.
