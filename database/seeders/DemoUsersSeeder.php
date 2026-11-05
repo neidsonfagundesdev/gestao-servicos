@@ -44,8 +44,12 @@ class DemoUsersSeeder extends Seeder
         }
 
         /*
-        Cria o administrador somente
-        se ele ainda não existir.
+        Usamos updateOrCreate porque:
+
+        - se o usuário não existe, ele é criado;
+        - se já existe, seus dados são atualizados;
+        - podemos alterar senha, nome ou perfil pelas variáveis
+        de ambiente sem criar usuários duplicados.
         */
         User::updateOrCreate(
             [
@@ -60,7 +64,7 @@ class DemoUsersSeeder extends Seeder
 
         /*
         Cria o funcionário somente
-        se ele ainda não existir.
+        se ele ainda não existir. Mesma regra do anterior.
         */
         User::updateOrCreate(
             [
