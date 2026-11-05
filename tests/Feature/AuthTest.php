@@ -82,4 +82,30 @@ class AuthTest extends TestCase
         $response->assertStatus(429);
     }
 
+    public function test_token_expirado_nao_pode_acessar_rota_protegida(): void
+    {
+        // Neste teste, o token expira em 60 minutos.
+        config([
+            'sanctum.expiration' => 60,
+        ]);
+
+        $usuario = User::factory()->create();
+
+        // Cria um token normalmente.
+        $token = $usuario->createToken('token-teste');
+
+        // Simula que esse token foi criado há 61 minutos.
+        $token->accessToken->forceFill([
+            'created_at' => now()->subMinutes(61),
+        ])->save();
+
+        // Tenta acessar uma rota protegida usando o token antigo.
+        $response = $this->withToken(
+            $token->plainTextToken
+        )->getJson('/api/me');
+
+        // Como passou de 60 minutos, deve ser recusado.
+        $response->assertStatus(401);
+    }
+
 }
