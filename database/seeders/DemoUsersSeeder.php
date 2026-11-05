@@ -47,7 +47,7 @@ class DemoUsersSeeder extends Seeder
         Cria o administrador somente
         se ele ainda não existir.
         */
-        User::firstOrCreate(
+        User::updateOrCreate(
             [
                 'email' => 'admin@teste.com',
             ],
@@ -62,7 +62,7 @@ class DemoUsersSeeder extends Seeder
         Cria o funcionário somente
         se ele ainda não existir.
         */
-        User::firstOrCreate(
+        User::updateOrCreate(
             [
                 'email' => 'funcionario@teste.com',
             ],
