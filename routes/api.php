@@ -88,7 +88,8 @@ Route::middleware(['auth:sanctum', 'admin'])->delete(
                                /* ROTAS LOGIN */
 
 //rota para autenticacao de login e senha
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1');
 
 // rotas protegidas por autenticação
 Route::middleware('auth:sanctum')->group(function () {
